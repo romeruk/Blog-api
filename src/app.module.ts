@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -6,13 +6,19 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ApiModule } from './api/api.module';
 import { databaseConfig } from './config/databse.config';
+import { ServiceModule } from './service/service.module';
+import { ApplicationConfig } from './config/app.config';
+import { APP_PIPE } from '@nestjs/core';
 
 @Module({
   imports: [
-    GraphQLModule.forRoot({}),
+    GraphQLModule.forRoot({
+      autoSchemaFile: 'schema.gql',
+      context: ({ req, res }) => ({ req, res }),
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig],
+      load: [databaseConfig, ApplicationConfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -32,8 +38,15 @@ import { databaseConfig } from './config/databse.config';
       },
     }),
     ApiModule,
+    ServiceModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_PIPE,
+      useClass: ValidationPipe,
+    },
+  ],
 })
 export class AppModule {}

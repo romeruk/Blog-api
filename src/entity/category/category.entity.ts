@@ -3,9 +3,13 @@ import { AppBaseEntity } from '../base/base.entity';
 @Entity()
 export class Category extends AppBaseEntity {
   @Column()
-  @PrimaryColumn()
+  @PrimaryColumn({
+    unique: true,
+  })
   title: string;
   @Column()
-  @PrimaryColumn()
+  @PrimaryColumn({
+    unique: true,
+  })
   slug: string;
 }

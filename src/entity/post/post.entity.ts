@@ -14,10 +14,14 @@ import { Image } from '../image/image.entity';
 @Entity()
 export class Post extends AppBaseEntity {
   @Column()
-  @PrimaryColumn()
+  @PrimaryColumn({
+    unique: true,
+  })
   title: string;
   @Column()
-  @PrimaryColumn()
+  @PrimaryColumn({
+    unique: true,
+  })
   slug: string;
   @Column()
   content: string;

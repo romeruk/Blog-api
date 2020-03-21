@@ -1,11 +1,4 @@
-import {
-  Entity,
-  Column,
-  ManyToMany,
-  JoinTable,
-  PrimaryColumn,
-  OneToMany,
-} from 'typeorm';
+import { Entity, Column, PrimaryColumn, OneToMany } from 'typeorm';
 import { AppBaseEntity } from '../base/base.entity';
 import { Post } from '../post/post.entity';
 @Entity()
@@ -17,7 +10,9 @@ export class User extends AppBaseEntity {
   lastName: string;
 
   @Column()
-  @PrimaryColumn()
+  @PrimaryColumn({
+    unique: true,
+  })
   email: string;
 
   @Column({ select: false })
@@ -46,5 +41,5 @@ export class User extends AppBaseEntity {
       nullable: true,
     },
   )
-  posts: Post[];
+  posts: Post[] | null;
 }
