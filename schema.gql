@@ -13,15 +13,28 @@ type Mutation {
   register(credentials: CreateUserInput!): UserType!
   verifyUser(token: String!): UserType!
   setPasswordResetToken(email: String!): UserType!
-  resetPasswordByToken(input: resetPasswordInput!): UserType!
+  resetPasswordByToken(input: ResetPasswordInput!): UserType!
+  updateUser(input: UpdateUserInput!): UserType!
+  logIn(credentials: UserLogInInput!): UserType!
 }
 
 type Query {
   hello: String!
 }
 
-input resetPasswordInput {
+input ResetPasswordInput {
   passwordResetToken: String!
+  password: String!
+}
+
+input UpdateUserInput {
+  firstName: String!
+  lastName: String!
+  password: String
+}
+
+input UserLogInInput {
+  email: String!
   password: String!
 }
 

@@ -1,16 +1,19 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { UserType } from '../types/user/user.type';
 import { UserService } from 'src/service/services/user.service';
-import { CreateUserInput, resetPasswordInput } from '../inputs/user/user.input';
+import {
+  CreateUserInput,
+  ResetPasswordInput,
+  UpdateUserInput,
+} from '../inputs/user/user.input';
+import { CurrentUser } from 'src/common/decorators/decorators';
+import { UseGuards } from '@nestjs/common';
+import { GqlAuthGuard } from 'src/common/guards/gql.guard';
+import { IPayload } from 'src/common/interfaces/payload.interface';
 
 @Resolver('User')
 export class UserResolver {
   constructor(private userService: UserService) {}
-
-  @Query(returns => String)
-  hello() {
-    return '123';
-  }
 
   @Mutation(returns => UserType)
   async register(@Args('credentials') input: CreateUserInput) {
@@ -31,8 +34,16 @@ export class UserResolver {
   }
 
   @Mutation(returns => UserType)
-  async resetPasswordByToken(@Args('input') input: resetPasswordInput) {
-    const user = await this.userService.resetPasswordByToken(input);
-    return user;
+  async resetPasswordByToken(@Args('input') input: ResetPasswordInput) {
+    return await this.userService.resetPasswordByToken(input);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Mutation(returns => UserType)
+  async updateUser(
+    @Args('input') input: UpdateUserInput,
+    @CurrentUser() user: IPayload,
+  ) {
+    return await this.userService.updateUser(input, user);
   }
 }

@@ -7,8 +7,11 @@ import { VerificationTokenGenerator } from '../helpers/verification-token-genera
 import { ConfigService } from '@nestjs/config';
 import {
   CreateUserInput,
-  resetPasswordInput,
+  ResetPasswordInput,
+  UpdateUserInput,
 } from 'src/api/inputs/user/user.input';
+import { CurrentUser } from 'src/common/decorators/decorators';
+import { IPayload } from 'src/common/interfaces/payload.interface';
 
 @Injectable()
 export class UserService {
@@ -41,7 +44,29 @@ export class UserService {
 
     //todo SEND EMAIL
 
-    return await this.connection.manager.save(user);
+    return await this.connection
+      .getRepository(User)
+      .save(user, { reload: false });
+  }
+
+  async updateUser(input: UpdateUserInput, @CurrentUser() user: IPayload) {
+    const findUser = await this.connection
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .where('user.email = :email', { email: user.email })
+      .addSelect('user.password')
+      .getOne();
+
+    findUser.firstName = input.firstName;
+    findUser.lastName = input.lastName;
+
+    if (input.password) {
+      findUser.password = await bcryptjs.hash(input.password, 10);
+    }
+
+    return await this.connection
+      .getRepository(User)
+      .save(findUser, { reload: false });
   }
 
   async verifyUserByToken(
@@ -58,7 +83,9 @@ export class UserService {
       ) {
         user.verificationToken = null;
         user.verified = true;
-        return this.connection.getRepository(User).save(user);
+        return this.connection
+          .getRepository(User)
+          .save(user, { reload: false });
       } else {
         throw new BadRequestException('Verification Token Expired');
       }
@@ -80,11 +107,11 @@ export class UserService {
     }
     user.passwordResetToken = this.verificationTokenGenerator.generateVerificationToken();
     //todo SEND EMAIL
-    return this.connection.getRepository(User).save(user);
+    return this.connection.getRepository(User).save(user, { reload: false });
   }
 
   async resetPasswordByToken(
-    input: resetPasswordInput,
+    input: ResetPasswordInput,
   ): Promise<User | undefined> {
     const { passwordResetToken, password } = input;
     const user = await this.connection.getRepository(User).findOne({
@@ -99,7 +126,9 @@ export class UserService {
       ) {
         user.password = await bcryptjs.hash(password, 10);
         user.passwordResetToken = null;
-        return this.connection.getRepository(User).save(user);
+        return this.connection
+          .getRepository(User)
+          .save(user, { reload: false });
       } else {
         throw new BadRequestException('Reset password Token Expired');
       }
