@@ -63,7 +63,7 @@ export class AuthService {
     };
 
     const jwt = this.jwtService.sign(payload);
-
+    console.log(jwt);
     res.cookie('token', jwt, {
       httpOnly: true,
       expires: new Date(Date.now() + ms(jwtTokenDuration)),

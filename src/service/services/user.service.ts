@@ -42,7 +42,7 @@ export class UserService {
       user.verified = true;
     }
 
-    //todo SEND EMAIL
+    //TODO SEND EMAIL
 
     return await this.connection
       .getRepository(User)
@@ -90,6 +90,23 @@ export class UserService {
         throw new BadRequestException('Verification Token Expired');
       }
     }
+  }
+
+  async setVerificationToken(user: User): Promise<User> {
+    user.verificationToken = this.verificationTokenGenerator.generateVerificationToken();
+    user.verified = false;
+    return this.connection.manager.save(user);
+  }
+
+  async refreshVerificationToken(emailAddress: string): Promise<boolean> {
+    const user = await this.getUserByEmailAddress(emailAddress);
+    if (user && !user.verified) {
+      await this.setVerificationToken(user);
+      //TODO SEND EMAIL
+      return true;
+    }
+
+    return false;
   }
 
   async getUserByEmailAddress(emailAddress: string): Promise<User | undefined> {

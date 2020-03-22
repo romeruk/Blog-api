@@ -12,8 +12,7 @@ import { AdminGqlGuard } from 'src/common/guards/role.guard';
 export class AuthResolver {
   constructor(private authService: AuthService) {}
 
-  @UseGuards(GqlAuthGuard, AdminGqlGuard)
-  @isAdminAccess(true)
+  @UseGuards(GqlAuthGuard)
   @Query(returns => String)
   hello() {
     return '123';
@@ -26,5 +25,12 @@ export class AuthResolver {
   ) {
     const result = await this.authService.logIn(input, res);
     return result;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAuthGuard)
+  async logOut(@ResGql() res: Response) {
+    res.clearCookie('token');
+    return true;
   }
 }

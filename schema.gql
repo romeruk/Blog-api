@@ -14,8 +14,10 @@ type Mutation {
   verifyUser(token: String!): UserType!
   setPasswordResetToken(email: String!): UserType!
   resetPasswordByToken(input: ResetPasswordInput!): UserType!
+  refreshVerificationToken(email: String!): Boolean!
   updateUser(input: UpdateUserInput!): UserType!
   logIn(credentials: UserLogInInput!): UserType!
+  logOut: Boolean!
 }
 
 type Query {

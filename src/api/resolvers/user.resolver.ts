@@ -38,6 +38,11 @@ export class UserResolver {
     return await this.userService.resetPasswordByToken(input);
   }
 
+  @Mutation(returns => Boolean)
+  async refreshVerificationToken(@Args('email') email: string) {
+    return await this.userService.refreshVerificationToken(email);
+  }
+
   @UseGuards(GqlAuthGuard)
   @Mutation(returns => UserType)
   async updateUser(
