@@ -1,4 +1,4 @@
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 
 @ObjectType()
 export class CategoryType {
@@ -14,4 +14,12 @@ export class CategoryType {
     nullable: true,
   })
   deletedAt?: Date;
+}
+
+@ObjectType()
+export class Categories {
+  @Field(type => Int)
+  total: number;
+  @Field(type => [CategoryType])
+  categories: CategoryType[];
 }

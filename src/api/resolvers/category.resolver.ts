@@ -3,7 +3,7 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/common/guards/gql.guard';
 import { AdminGqlGuard } from 'src/common/guards/role.guard';
 import { CategoryService } from 'src/service/services/category.service';
-import { CategoryType } from '../types/category/category.type';
+import { CategoryType, Categories } from '../types/category/category.type';
 import {
   CategoryCreateInput,
   CategoryUpdateInput,
@@ -16,9 +16,12 @@ import { isAdminAccess } from 'src/common/decorators/decorators';
 export class CategoryResolver {
   constructor(private categoryService: CategoryService) {}
 
-  @Query(returns => [CategoryType])
-  async findAllCategories() {
-    return this.categoryService.findAll();
+  @Query(returns => Categories)
+  async findAllCategories(
+    @Args('limit') limit: number,
+    @Args('page') page: number,
+  ) {
+    return this.categoryService.findAll(limit, page);
   }
 
   @Query(returns => CategoryType)

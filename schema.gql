@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Categories {
+  total: Int!
+  categories: [CategoryType!]!
+}
+
 input CategoryCreateInput {
   title: String!
   slug: String
@@ -49,7 +54,7 @@ type Mutation {
 
 type Query {
   hello: String!
-  findAllCategories: [CategoryType!]!
+  findAllCategories(page: Float!, limit: Float!): Categories!
   findOneCategory(title: String!): CategoryType!
 }
 

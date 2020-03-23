@@ -11,6 +11,7 @@ import {
 } from 'src/api/inputs/category/category.input';
 import { Category } from 'src/entity/category/category.entity';
 import slugify from 'slugify';
+import { Categories } from 'src/api/types/category/category.type';
 
 @Injectable()
 export class CategoryService {
@@ -96,7 +97,19 @@ export class CategoryService {
     return updatedCategory;
   }
 
-  async findAll() {
-    return this.connection.getRepository(Category).find();
+  async findAll(limit = 10, page = 0): Promise<Categories> {
+    const [categories, total] = await this.connection
+      .getRepository(Category)
+      .findAndCount({
+        skip: page > 0 ? (page - 1) * limit : 0,
+        take: limit,
+        withDeleted: true,
+      });
+
+    const foundСategories = new Categories();
+    foundСategories.categories = categories;
+    foundСategories.total = total;
+
+    return foundСategories;
   }
 }
