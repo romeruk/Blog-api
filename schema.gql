@@ -38,12 +38,16 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Mutation {
-  register(credentials: CreateUserInput!): UserType!
+  createAdminUser(credentials: CreateUserInput!): UserType!
+  removeUser(email: String!): UserType!
+  recoverUser(email: String!): UserType!
+  findAllUsers(page: Float!, limit: Float!): Users!
   verifyUser(token: String!): UserType!
   setPasswordResetToken(email: String!): UserType!
   resetPasswordByToken(input: ResetPasswordInput!): UserType!
   refreshVerificationToken(email: String!): Boolean!
   updateUser(input: UpdateUserInput!): UserType!
+  register(credentials: CreateUserInput!): UserType!
   logIn(credentials: UserLogInInput!): UserType!
   logOut: Boolean!
   createCategory(input: CategoryCreateInput!): CategoryType!
@@ -53,7 +57,7 @@ type Mutation {
 }
 
 type Query {
-  hello: String!
+  findOneUser(email: String!): UserType!
   findAllCategories(page: Float!, limit: Float!): Categories!
   findOneCategory(title: String!): CategoryType!
 }
@@ -74,6 +78,11 @@ input UserLogInInput {
   password: String!
 }
 
+type Users {
+  total: Int!
+  users: [UserType!]!
+}
+
 type UserType {
   firstName: String!
   lastName: String!
@@ -82,4 +91,5 @@ type UserType {
   verified: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
+  deletedAt: DateTime
 }

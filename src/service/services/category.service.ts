@@ -19,6 +19,7 @@ export class CategoryService {
 
   async findOne(title: string) {
     const category = await this.connection.getRepository(Category).findOne({
+      withDeleted: true,
       where: {
         title: title,
       },
@@ -28,7 +29,7 @@ export class CategoryService {
   }
 
   async createCategory(input: CategoryCreateInput): Promise<Category> {
-    const existing = this.findOne(input.title);
+    const existing = await this.findOne(input.title);
 
     if (existing) {
       throw new InternalServerErrorException('Title must be unique');
