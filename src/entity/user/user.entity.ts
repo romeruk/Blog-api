@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  OneToMany,
+  DeleteDateColumn,
+} from 'typeorm';
 import { AppBaseEntity } from '../base/base.entity';
 import { Post } from '../post/post.entity';
 @Entity()
@@ -42,4 +48,7 @@ export class User extends AppBaseEntity {
     },
   )
   posts: Post[] | null;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt: Date;
 }
