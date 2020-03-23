@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, DeleteDateColumn } from 'typeorm';
 import { AppBaseEntity } from '../base/base.entity';
 @Entity()
 export class Category extends AppBaseEntity {
@@ -12,4 +12,7 @@ export class Category extends AppBaseEntity {
     unique: true,
   })
   slug: string;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt: Date;
 }

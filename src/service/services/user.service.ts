@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import * as bcryptjs from 'bcryptjs';
@@ -23,6 +27,16 @@ export class UserService {
 
   async createUser(input: CreateUserInput) {
     const { firstName, lastName, email, password } = input;
+
+    const existing = await this.connection.getRepository(User).findOne({
+      where: {
+        email,
+      },
+    });
+
+    if (existing) {
+      throw new InternalServerErrorException('Email must be unique');
+    }
 
     const isVerificationRequired = this.configService.get<boolean>(
       'app.verificationRequired',

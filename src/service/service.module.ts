@@ -7,8 +7,9 @@ import { AuthService } from './services/auth.service';
 import { VerificationTokenGenerator } from './helpers/verification-token-generator';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './auth/jwt.strategy';
+import { CategoryService } from './services/category.service';
 
-const services = [UserService, AuthService];
+const services = [UserService, AuthService, CategoryService];
 
 const modules = [
   PassportModule,

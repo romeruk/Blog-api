@@ -2,12 +2,35 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input CategoryCreateInput {
+  title: String!
+  slug: String
+}
+
+type CategoryType {
+  title: String!
+  slug: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
+input CategoryUpdateInput {
+  title: String!
+  slug: String
+}
+
 input CreateUserInput {
   firstName: String!
   lastName: String!
   email: String!
   password: String!
 }
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type Mutation {
   register(credentials: CreateUserInput!): UserType!
@@ -18,10 +41,16 @@ type Mutation {
   updateUser(input: UpdateUserInput!): UserType!
   logIn(credentials: UserLogInInput!): UserType!
   logOut: Boolean!
+  createCategory(input: CategoryCreateInput!): CategoryType!
+  removeCategory(title: String!): CategoryType!
+  recoverCategory(title: String!): CategoryType!
+  updateCategory(input: CategoryUpdateInput!, title: String!): CategoryType!
 }
 
 type Query {
   hello: String!
+  findAllCategories: [CategoryType!]!
+  findOneCategory(title: String!): CategoryType!
 }
 
 input ResetPasswordInput {
@@ -46,4 +75,6 @@ type UserType {
   email: String!
   isAdmin: Boolean!
   verified: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }

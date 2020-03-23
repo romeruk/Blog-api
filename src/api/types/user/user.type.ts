@@ -12,4 +12,8 @@ export class UserType {
   isAdmin: boolean;
   @Field(type => Boolean)
   verified: boolean;
+  @Field(type => Date)
+  createdAt: Date;
+  @Field(type => Date)
+  updatedAt: Date;
 }

@@ -3,5 +3,5 @@ import { registerAs } from '@nestjs/config';
 export const ApplicationConfig = registerAs('app', () => ({
   verificationTokenDuration: '7d',
   verificationRequired: true,
-  jwtTokenDuration: '1m',
+  jwtTokenDuration: '10m',
 }));
