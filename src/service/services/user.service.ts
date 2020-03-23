@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
@@ -16,6 +17,7 @@ import {
 } from 'src/api/inputs/user/user.input';
 import { CurrentUser } from 'src/common/decorators/decorators';
 import { IPayload } from 'src/common/interfaces/payload.interface';
+import { Users } from 'src/api/types/user/user.type';
 
 @Injectable()
 export class UserService {
@@ -25,14 +27,10 @@ export class UserService {
     private verificationTokenGenerator: VerificationTokenGenerator,
   ) {}
 
-  async createUser(input: CreateUserInput) {
+  async createUser(input: CreateUserInput, isAdmin = false) {
     const { firstName, lastName, email, password } = input;
 
-    const existing = await this.connection.getRepository(User).findOne({
-      where: {
-        email,
-      },
-    });
+    const existing = await this.getUserByEmailAddress(email);
 
     if (existing) {
       throw new InternalServerErrorException('Email must be unique');
@@ -48,8 +46,9 @@ export class UserService {
     user.lastName = lastName;
     user.password = await bcryptjs.hash(password, 10);
     user.email = email;
-    user.isAdmin = false;
-    if (isVerificationRequired) {
+    user.isAdmin = isAdmin;
+
+    if (isVerificationRequired && !isAdmin) {
       user.verificationToken = this.verificationTokenGenerator.generateVerificationToken();
       user.verified = false;
     } else {
@@ -81,6 +80,38 @@ export class UserService {
     return await this.connection
       .getRepository(User)
       .save(findUser, { reload: false });
+  }
+
+  async removeUser(email: string) {
+    const user = await this.getUserByEmailAddress(email);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.isAdmin) {
+      throw new BadRequestException('You cannot remove admin user');
+    }
+
+    const removedUser = await this.connection
+      .getRepository(User)
+      .softRemove(user);
+
+    return removedUser;
+  }
+
+  async recoverUser(email: string) {
+    const user = await this.getUserByEmailAddress(email);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const restoredCategory = await this.connection
+      .getRepository(User)
+      .recover(user);
+
+    return restoredCategory;
   }
 
   async verifyUserByToken(
@@ -125,6 +156,7 @@ export class UserService {
 
   async getUserByEmailAddress(emailAddress: string): Promise<User | undefined> {
     return this.connection.getRepository(User).findOne({
+      withDeleted: true,
       where: {
         email: emailAddress,
       },
@@ -164,5 +196,24 @@ export class UserService {
         throw new BadRequestException('Reset password Token Expired');
       }
     }
+  }
+
+  async findAll(limit = 10, page = 0): Promise<Users> {
+    const [users, total] = await this.connection
+      .getRepository(User)
+      .findAndCount({
+        skip: page > 0 ? (page - 1) * limit : 0,
+        take: limit,
+        withDeleted: true,
+        where: {
+          isAdmin: false,
+        },
+      });
+
+    const foundUsers = new Users();
+    foundUsers.users = users;
+    foundUsers.total = total;
+
+    return foundUsers;
   }
 }
