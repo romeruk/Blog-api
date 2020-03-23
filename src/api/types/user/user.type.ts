@@ -16,4 +16,16 @@ export class UserType {
   createdAt: Date;
   @Field(type => Date)
   updatedAt: Date;
+  @Field(type => Date, {
+    nullable: true,
+  })
+  deletedAt?: Date;
+}
+
+@ObjectType()
+export class Users {
+  @Field(type => Int)
+  total: number;
+  @Field(type => [UserType])
+  users: UserType[];
 }
