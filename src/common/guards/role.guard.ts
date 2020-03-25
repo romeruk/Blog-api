@@ -7,12 +7,8 @@ export class AdminGqlGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const isAdmin = this.reflector.get<boolean>(
-      'isAdminAccess',
-      context.getHandler(),
-    );
-
-    if (isAdmin == null) {
+    const roles = this.reflector.get<string[]>('roles', context.getHandler());
+    if (!roles) {
       return true;
     }
 
@@ -20,7 +16,9 @@ export class AdminGqlGuard implements CanActivate {
     const req = ctx.getContext().req;
     const user = req.user;
 
-    if (user.isAdmin !== isAdmin) {
+    const hasAccess = roles.find(role => role === user.role);
+
+    if (!hasAccess) {
       return false;
     }
 

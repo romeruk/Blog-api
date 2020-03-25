@@ -98,13 +98,17 @@ export class CategoryService {
     return updatedCategory;
   }
 
-  async findAll(limit = 10, page = 0): Promise<Categories> {
+  async findAll(
+    limit = 10,
+    page = 0,
+    withDeleted = false,
+  ): Promise<Categories> {
     const [categories, total] = await this.connection
       .getRepository(Category)
       .findAndCount({
         skip: page > 0 ? (page - 1) * limit : 0,
         take: limit,
-        withDeleted: true,
+        ...(withDeleted && { withDeleted }),
       });
 
     const foundСategories = new Categories();

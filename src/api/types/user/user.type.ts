@@ -1,4 +1,10 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { ObjectType, Field, Int, registerEnumType } from '@nestjs/graphql';
+import { UserRole } from 'src/entity/user/user.entity';
+
+registerEnumType(UserRole, {
+  name: 'UserRole', // this one is mandatory
+  description: 'The basic directions', // this one is optional
+});
 
 @ObjectType()
 export class UserType {
@@ -8,8 +14,8 @@ export class UserType {
   lastName: string;
   @Field(type => String)
   email: string;
-  @Field(type => Boolean)
-  isAdmin: boolean;
+  @Field(type => UserRole)
+  role: UserRole;
   @Field(type => Boolean)
   verified: boolean;
   @Field(type => Date)

@@ -59,7 +59,7 @@ export class AuthService {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      isAdmin: user.isAdmin,
+      role: user.role,
     };
 
     const jwt = this.jwtService.sign(payload);

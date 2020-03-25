@@ -6,13 +6,6 @@ export class CategoryCreateInput {
   @Field(type => String)
   @IsNotEmpty()
   title: string;
-
-  @Field(type => String, {
-    nullable: true,
-  })
-  @IsOptional()
-  @MinLength(2)
-  slug?: string;
 }
 
 @InputType()

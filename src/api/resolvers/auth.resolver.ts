@@ -1,12 +1,11 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { Response } from 'express';
-import { ResGql, isAdminAccess } from '../../common/decorators/decorators';
+import { ResGql } from '../../common/decorators/decorators';
 import { UseGuards } from '@nestjs/common';
 import { AuthService } from 'src/service/services/auth.service';
 import { UserLogInInput, CreateUserInput } from '../inputs/user/user.input';
 import { UserType } from '../types/user/user.type';
 import { GqlAuthGuard } from 'src/common/guards/gql.guard';
-import { AdminGqlGuard } from 'src/common/guards/role.guard';
 import { UserService } from 'src/service/services/user.service';
 
 @Resolver('Auth')

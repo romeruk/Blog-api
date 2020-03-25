@@ -8,8 +8,9 @@ import { VerificationTokenGenerator } from './helpers/verification-token-generat
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { CategoryService } from './services/category.service';
+import { PostService } from './services/post.service';
 
-const services = [UserService, AuthService, CategoryService];
+const services = [UserService, AuthService, CategoryService, PostService];
 
 const modules = [
   PassportModule,

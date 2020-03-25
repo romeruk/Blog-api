@@ -7,9 +7,11 @@ import { AuthService } from 'src/service/services/auth.service';
 import { ServiceModule } from 'src/service/service.module';
 import { CategoryResolver } from './resolvers/category.resolver';
 import { CategoryService } from 'src/service/services/category.service';
+import { PostResolver } from './resolvers/post.resolver';
+import { PostService } from 'src/service/services/post.service';
 
-const resolvers = [UserResolver, AuthResolver, CategoryResolver];
-const services = [UserService, AuthService, CategoryService];
+const resolvers = [UserResolver, AuthResolver, CategoryResolver, PostResolver];
+const services = [UserService, AuthService, CategoryService, PostService];
 const modules = [ServiceModule];
 
 @Module({

@@ -19,5 +19,4 @@ export const ResGql = createParamDecorator(
   },
 );
 
-export const isAdminAccess = (isAdmin: boolean) =>
-  SetMetadata('isAdminAccess', isAdmin);
+export const Roles = (...roles: string[]) => SetMetadata('roles', roles);

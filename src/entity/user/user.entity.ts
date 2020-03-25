@@ -7,6 +7,13 @@ import {
 } from 'typeorm';
 import { AppBaseEntity } from '../base/base.entity';
 import { Post } from '../post/post.entity';
+
+export enum UserRole {
+  SUPERADMIN = 'SUPERADMIN',
+  ADMIN = 'ADMIN',
+  USER = 'USER',
+}
+
 @Entity()
 export class User extends AppBaseEntity {
   @Column()
@@ -36,9 +43,11 @@ export class User extends AppBaseEntity {
   passwordResetToken: string | null;
 
   @Column({
-    default: false,
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.USER,
   })
-  isAdmin: boolean;
+  role: UserRole;
 
   @OneToMany(
     type => Post,

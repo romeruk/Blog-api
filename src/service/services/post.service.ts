@@ -35,9 +35,9 @@ export class PostService {
     post.slug = slugify(input.title);
     post.content = input.content;
 
-    if (user.isAdmin) {
-      post.isActive = true;
-    }
+    // if (user.isAdmin) {
+    //   post.isActive = true;
+    // }
 
     post.user = author;
 

@@ -7,7 +7,7 @@ import {
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import * as bcryptjs from 'bcryptjs';
-import { User } from 'src/entity/user/user.entity';
+import { User, UserRole } from 'src/entity/user/user.entity';
 import { VerificationTokenGenerator } from '../helpers/verification-token-generator';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -27,7 +27,7 @@ export class UserService {
     private verificationTokenGenerator: VerificationTokenGenerator,
   ) {}
 
-  async createUser(input: CreateUserInput, isAdmin = false) {
+  async createUser(input: CreateUserInput, role = UserRole.USER) {
     const { firstName, lastName, email, password } = input;
 
     const existing = await this.getUserByEmailAddress(email);
@@ -46,9 +46,9 @@ export class UserService {
     user.lastName = lastName;
     user.password = await bcryptjs.hash(password, 10);
     user.email = email;
-    user.isAdmin = isAdmin;
+    user.role = role;
 
-    if (isVerificationRequired && !isAdmin) {
+    if (isVerificationRequired && role === UserRole.USER) {
       user.verificationToken = this.verificationTokenGenerator.generateVerificationToken();
       user.verified = false;
     } else {
@@ -87,10 +87,6 @@ export class UserService {
 
     if (!user) {
       throw new NotFoundException('User not found');
-    }
-
-    if (user.isAdmin) {
-      throw new BadRequestException('You cannot remove admin user');
     }
 
     const removedUser = await this.connection
@@ -205,9 +201,6 @@ export class UserService {
         skip: page > 0 ? (page - 1) * limit : 0,
         take: limit,
         withDeleted: true,
-        where: {
-          isAdmin: false,
-        },
       });
 
     const foundUsers = new Users();

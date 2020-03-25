@@ -8,11 +8,10 @@ import {
   CategoryCreateInput,
   CategoryUpdateInput,
 } from '../inputs/category/category.input';
-import { isAdminAccess } from 'src/common/decorators/decorators';
+import { Roles } from 'src/common/decorators/decorators';
+import { UserRole } from 'src/entity/user/user.entity';
 
 @Resolver('Category')
-@UseGuards(GqlAuthGuard, AdminGqlGuard)
-@isAdminAccess(true)
 export class CategoryResolver {
   constructor(private categoryService: CategoryService) {}
 
@@ -29,21 +28,28 @@ export class CategoryResolver {
     return this.categoryService.findOne(title);
   }
 
+  @UseGuards(GqlAuthGuard, AdminGqlGuard)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   @Mutation(returns => CategoryType)
   async createCategory(@Args('input') input: CategoryCreateInput) {
     return await this.categoryService.createCategory(input);
   }
 
+  @UseGuards(GqlAuthGuard, AdminGqlGuard)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   @Mutation(returns => CategoryType)
   async removeCategory(@Args('title') title: string) {
     return this.categoryService.removeCategory(title);
   }
-
+  @UseGuards(GqlAuthGuard, AdminGqlGuard)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   @Mutation(returns => CategoryType)
   async recoverCategory(@Args('title') title: string) {
     return this.categoryService.recoverCategory(title);
   }
 
+  @UseGuards(GqlAuthGuard, AdminGqlGuard)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   @Mutation(returns => CategoryType)
   async updateCategory(
     @Args('title') title: string,

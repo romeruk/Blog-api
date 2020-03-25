@@ -9,7 +9,6 @@ type Categories {
 
 input CategoryCreateInput {
   title: String!
-  slug: String
 }
 
 type CategoryType {
@@ -22,7 +21,13 @@ type CategoryType {
 
 input CategoryUpdateInput {
   title: String!
-  slug: String
+}
+
+input CreatePostInput {
+  title: String!
+  content: String!
+  categories: [String!]!
+  images: [String!]!
 }
 
 input CreateUserInput {
@@ -36,6 +41,10 @@ input CreateUserInput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type Image {
+  url: String!
+}
 
 type Mutation {
   createAdminUser(credentials: CreateUserInput!): UserType!
@@ -54,6 +63,17 @@ type Mutation {
   removeCategory(title: String!): CategoryType!
   recoverCategory(title: String!): CategoryType!
   updateCategory(input: CategoryUpdateInput!, title: String!): CategoryType!
+  createPost(input: CreatePostInput!): PostType!
+}
+
+type PostType {
+  title: String!
+  slug: String!
+  content: String!
+  isActive: Boolean!
+  images: [Image!]!
+  user: UserType!
+  categories: [CategoryType!]!
 }
 
 type Query {
@@ -78,6 +98,13 @@ input UserLogInInput {
   password: String!
 }
 
+"""The basic directions"""
+enum UserRole {
+  SUPERADMIN
+  ADMIN
+  USER
+}
+
 type Users {
   total: Int!
   users: [UserType!]!
@@ -87,7 +114,7 @@ type UserType {
   firstName: String!
   lastName: String!
   email: String!
-  isAdmin: Boolean!
+  role: UserRole!
   verified: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!

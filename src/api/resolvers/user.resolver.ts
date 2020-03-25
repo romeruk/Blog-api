@@ -6,46 +6,47 @@ import {
   ResetPasswordInput,
   UpdateUserInput,
 } from '../inputs/user/user.input';
-import { CurrentUser, isAdminAccess } from 'src/common/decorators/decorators';
+import { CurrentUser, Roles } from 'src/common/decorators/decorators';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/common/guards/gql.guard';
 import { IPayload } from 'src/common/interfaces/payload.interface';
 import { AdminGqlGuard } from 'src/common/guards/role.guard';
+import { UserRole } from 'src/entity/user/user.entity';
 
 @Resolver('User')
 export class UserResolver {
   constructor(private userService: UserService) {}
 
   @UseGuards(GqlAuthGuard, AdminGqlGuard)
-  @isAdminAccess(true)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   @Mutation(returns => UserType)
   async createAdminUser(@Args('credentials') input: CreateUserInput) {
-    return await this.userService.createUser(input, true);
+    return await this.userService.createUser(input, UserRole.ADMIN);
   }
 
   @UseGuards(GqlAuthGuard, AdminGqlGuard)
-  @isAdminAccess(true)
+  @Roles(UserRole.SUPERADMIN)
   @Mutation(returns => UserType)
   async removeUser(@Args('email') email: string) {
     return await this.userService.removeUser(email);
   }
 
   @UseGuards(GqlAuthGuard, AdminGqlGuard)
-  @isAdminAccess(true)
+  @Roles(UserRole.SUPERADMIN)
   @Mutation(returns => UserType)
   async recoverUser(@Args('email') email: string) {
     return await this.userService.recoverUser(email);
   }
 
   @UseGuards(GqlAuthGuard, AdminGqlGuard)
-  @isAdminAccess(true)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   @Query(returns => UserType)
   async findOneUser(@Args('email') email: string) {
     return await this.userService.getUserByEmailAddress(email);
   }
 
   @UseGuards(GqlAuthGuard, AdminGqlGuard)
-  @isAdminAccess(true)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   @Mutation(returns => Users)
   async findAllUsers(@Args('limit') limit: number, @Args('page') page: number) {
     return await this.userService.findAll(limit, page);
