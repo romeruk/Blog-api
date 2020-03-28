@@ -159,6 +159,10 @@ export class UserService {
     });
   }
 
+  async getMe(@CurrentUser() user: IPayload) {
+    return await this.getUserByEmailAddress(user.email);
+  }
+
   async setPasswordResetToken(emailAddress: string): Promise<User | undefined> {
     const user = await this.getUserByEmailAddress(emailAddress);
     if (!user) {

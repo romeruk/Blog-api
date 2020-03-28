@@ -80,4 +80,10 @@ export class UserResolver {
   ) {
     return await this.userService.updateUser(input, user);
   }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(returns => UserType)
+  async getMe(@CurrentUser() user: IPayload) {
+    return await this.userService.getMe(user);
+  }
 }
