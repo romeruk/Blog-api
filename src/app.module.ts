@@ -41,12 +41,6 @@ import { APP_PIPE } from '@nestjs/core';
     ServiceModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_PIPE,
-      useClass: ValidationPipe,
-    },
-  ],
+  providers: [AppService],
 })
 export class AppModule {}

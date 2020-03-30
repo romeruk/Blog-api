@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { GqlAuthGuard } from 'src/common/guards/gql.guard';
 import { UseGuards } from '@nestjs/common';
 import { CreatePostInput } from '../inputs/post/post.input';
@@ -10,6 +10,11 @@ import { PostType } from '../types/post/post.type';
 @Resolver('Post')
 export class PostResolver {
   constructor(private postService: PostService) {}
+
+  @Query(returns => String)
+  hello() {
+    return 'hello';
+  }
 
   @UseGuards(GqlAuthGuard)
   @Mutation(returns => PostType)

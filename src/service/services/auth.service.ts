@@ -42,17 +42,32 @@ export class AuthService {
       .getOne();
 
     if (!user) {
-      throw new UnauthorizedException('user email or password invalid');
+      throw new UnauthorizedException([
+        {
+          name: 'email',
+          message: 'User email or password invalid',
+        },
+      ]);
     }
 
     if (isVerificationRequired && !user.verified) {
-      throw new UnauthorizedException('user verification is required');
+      throw new UnauthorizedException([
+        {
+          name: 'email',
+          message: 'User verification is required',
+        },
+      ]);
     }
 
     const currectPassword = await bcryptjs.compare(password, user.password);
 
     if (!currectPassword) {
-      throw new UnauthorizedException('user email or password invalid');
+      throw new UnauthorizedException([
+        {
+          name: 'email',
+          message: 'User email or password invalid',
+        },
+      ]);
     }
 
     const payload: IPayload = {
@@ -63,7 +78,7 @@ export class AuthService {
     };
 
     const jwt = this.jwtService.sign(payload);
-    console.log(jwt);
+
     res.cookie('token', jwt, {
       httpOnly: true,
       expires: new Date(Date.now() + ms(jwtTokenDuration)),

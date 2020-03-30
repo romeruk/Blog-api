@@ -27,13 +27,34 @@ export class UserService {
     private verificationTokenGenerator: VerificationTokenGenerator,
   ) {}
 
-  async createUser(input: CreateUserInput, role = UserRole.USER) {
+  async createUser(
+    input: CreateUserInput,
+    role = UserRole.USER,
+    @CurrentUser() currentUser: IPayload | null = null,
+  ) {
     const { firstName, lastName, email, password } = input;
 
     const existing = await this.getUserByEmailAddress(email);
 
     if (existing) {
-      throw new InternalServerErrorException('Email must be unique');
+      throw new InternalServerErrorException([
+        {
+          name: 'email',
+          message: 'email should be unique',
+        },
+      ]);
+    }
+
+    if (currentUser) {
+      if (currentUser.role === UserRole.ADMIN && role === UserRole.SUPERADMIN) {
+        throw new InternalServerErrorException([
+          {
+            name: 'role',
+            message:
+              'User with role "SUPERADMIN" can only be created by superadmin user',
+          },
+        ]);
+      }
     }
 
     const isVerificationRequired = this.configService.get<boolean>(
@@ -48,7 +69,7 @@ export class UserService {
     user.email = email;
     user.role = role;
 
-    if (isVerificationRequired && role === UserRole.USER) {
+    if (isVerificationRequired) {
       user.verificationToken = this.verificationTokenGenerator.generateVerificationToken();
       user.verified = false;
     } else {

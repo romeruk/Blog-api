@@ -47,7 +47,7 @@ type Image {
 }
 
 type Mutation {
-  createAdminUser(credentials: CreateUserInput!): UserType!
+  createUserByAdmin(role: String!, credentials: CreateUserInput!): UserType!
   removeUser(email: String!): UserType!
   recoverUser(email: String!): UserType!
   findAllUsers(page: Float!, limit: Float!): Users!
@@ -78,8 +78,10 @@ type PostType {
 
 type Query {
   findOneUser(email: String!): UserType!
+  getMe: UserType!
   findAllCategories(page: Float!, limit: Float!): Categories!
   findOneCategory(title: String!): CategoryType!
+  hello: String!
 }
 
 input ResetPasswordInput {

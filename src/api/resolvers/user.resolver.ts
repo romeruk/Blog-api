@@ -20,8 +20,12 @@ export class UserResolver {
   @UseGuards(GqlAuthGuard, AdminGqlGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   @Mutation(returns => UserType)
-  async createAdminUser(@Args('credentials') input: CreateUserInput) {
-    return await this.userService.createUser(input, UserRole.ADMIN);
+  async createUserByAdmin(
+    @Args('credentials') input: CreateUserInput,
+    @Args('role') role: UserRole,
+    @CurrentUser() user: IPayload,
+  ) {
+    return await this.userService.createUser(input, role, user);
   }
 
   @UseGuards(GqlAuthGuard, AdminGqlGuard)
