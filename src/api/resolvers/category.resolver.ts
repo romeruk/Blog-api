@@ -24,8 +24,13 @@ export class CategoryResolver {
   }
 
   @Query(returns => CategoryType)
-  async findOneCategory(@Args('title') title: string) {
+  async findOneByTitle(@Args('title') title: string) {
     return this.categoryService.findOne(title);
+  }
+
+  @Query(returns => CategoryType)
+  async findOneBySlug(@Args('slug') slug: string) {
+    return this.categoryService.findOneBySlug(slug);
   }
 
   @UseGuards(GqlAuthGuard, AdminGqlGuard)
