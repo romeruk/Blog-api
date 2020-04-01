@@ -103,11 +103,22 @@ export class UserService {
       .save(findUser, { reload: false });
   }
 
-  async removeUser(email: string) {
+  async removeUser(email: string, @CurrentUser() currUser: IPayload) {
+    if (currUser.email === email) {
+      throw new BadRequestException('You cannot remove yourself');
+    }
+
     const user = await this.getUserByEmailAddress(email);
 
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    if (
+      currUser.role === UserRole.ADMIN &&
+      (user.role === UserRole.ADMIN || user.role === UserRole.SUPERADMIN)
+    ) {
+      throw new BadRequestException('Only Super Admin can remove other admins');
     }
 
     const removedUser = await this.connection
@@ -117,11 +128,20 @@ export class UserService {
     return removedUser;
   }
 
-  async recoverUser(email: string) {
+  async recoverUser(email: string, @CurrentUser() currUser: IPayload) {
     const user = await this.getUserByEmailAddress(email);
 
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    if (
+      currUser.role === UserRole.ADMIN &&
+      (user.role === UserRole.ADMIN || user.role === UserRole.SUPERADMIN)
+    ) {
+      throw new BadRequestException(
+        'Only Super Admin can recover other admins',
+      );
     }
 
     const restoredCategory = await this.connection

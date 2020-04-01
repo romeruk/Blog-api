@@ -29,17 +29,23 @@ export class UserResolver {
   }
 
   @UseGuards(GqlAuthGuard, AdminGqlGuard)
-  @Roles(UserRole.SUPERADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   @Mutation(returns => UserType)
-  async removeUser(@Args('email') email: string) {
-    return await this.userService.removeUser(email);
+  async removeUser(
+    @Args('email') email: string,
+    @CurrentUser() user: IPayload,
+  ) {
+    return await this.userService.removeUser(email, user);
   }
 
   @UseGuards(GqlAuthGuard, AdminGqlGuard)
-  @Roles(UserRole.SUPERADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   @Mutation(returns => UserType)
-  async recoverUser(@Args('email') email: string) {
-    return await this.userService.recoverUser(email);
+  async recoverUser(
+    @Args('email') email: string,
+    @CurrentUser() user: IPayload,
+  ) {
+    return await this.userService.recoverUser(email, user);
   }
 
   @UseGuards(GqlAuthGuard, AdminGqlGuard)
@@ -51,7 +57,7 @@ export class UserResolver {
 
   @UseGuards(GqlAuthGuard, AdminGqlGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
-  @Mutation(returns => Users)
+  @Query(returns => Users)
   async findAllUsers(@Args('limit') limit: number, @Args('page') page: number) {
     return await this.userService.findAll(limit, page);
   }
