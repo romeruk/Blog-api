@@ -21,7 +21,18 @@ export class CategoryService {
     const category = await this.connection.getRepository(Category).findOne({
       withDeleted: true,
       where: {
-        title: title,
+        title,
+      },
+    });
+
+    return category;
+  }
+
+  async findOneBySlug(slug: string) {
+    const category = await this.connection.getRepository(Category).findOne({
+      withDeleted: true,
+      where: {
+        slug,
       },
     });
 
@@ -32,7 +43,12 @@ export class CategoryService {
     const existing = await this.findOne(input.title);
 
     if (existing) {
-      throw new InternalServerErrorException('Title must be unique');
+      throw new InternalServerErrorException([
+        {
+          name: 'title',
+          message: 'Title must be unique',
+        },
+      ]);
     }
 
     const category = new Category();
@@ -72,11 +88,19 @@ export class CategoryService {
     return restoredCategory;
   }
 
-  async updateCategory(title: string, input: CategoryUpdateInput) {
+  async updateCategory(
+    title: string,
+    input: CategoryUpdateInput,
+  ): Promise<Category> {
     const existing = await this.findOne(input.title);
 
     if (existing) {
-      throw new InternalServerErrorException('Title must be unique');
+      throw new InternalServerErrorException([
+        {
+          name: 'title',
+          message: 'Title must be unique',
+        },
+      ]);
     }
 
     const findCategory = await this.findOne(title);
@@ -93,22 +117,18 @@ export class CategoryService {
       .where('title = :title', { title })
       .execute();
 
-    const updatedCategory = await this.findOne(title);
+    const updatedCategory = await this.findOne(input.title);
 
     return updatedCategory;
   }
 
-  async findAll(
-    limit = 10,
-    page = 0,
-    withDeleted = false,
-  ): Promise<Categories> {
+  async findAll(limit = 10, page = 0): Promise<Categories> {
     const [categories, total] = await this.connection
       .getRepository(Category)
       .findAndCount({
+        withDeleted: true,
         skip: page > 0 ? (page - 1) * limit : 0,
         take: limit,
-        ...(withDeleted && { withDeleted }),
       });
 
     const foundСategories = new Categories();
