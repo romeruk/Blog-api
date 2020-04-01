@@ -50,7 +50,6 @@ type Mutation {
   createUserByAdmin(role: String!, credentials: CreateUserInput!): UserType!
   removeUser(email: String!): UserType!
   recoverUser(email: String!): UserType!
-  findAllUsers(page: Float!, limit: Float!): Users!
   verifyUser(token: String!): UserType!
   setPasswordResetToken(email: String!): UserType!
   resetPasswordByToken(input: ResetPasswordInput!): UserType!
@@ -78,9 +77,11 @@ type PostType {
 
 type Query {
   findOneUser(email: String!): UserType!
+  findAllUsers(page: Float!, limit: Float!): Users!
   getMe: UserType!
   findAllCategories(page: Float!, limit: Float!): Categories!
-  findOneCategory(title: String!): CategoryType!
+  findOneByTitle(title: String!): CategoryType!
+  findOneBySlug(slug: String!): CategoryType!
   hello: String!
 }
 

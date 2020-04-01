@@ -6,7 +6,6 @@ import {
   ValidationError,
   BadRequestException,
 } from '@nestjs/common';
-import { Any } from 'typeorm';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
