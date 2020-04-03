@@ -62,7 +62,9 @@ export class UserResolver {
     return await this.userService.findAll(limit, page);
   }
 
-  @Mutation(returns => UserType)
+  @Mutation(returns => UserType, {
+    nullable: true,
+  })
   async verifyUser(@Args('token') token: string) {
     return await this.userService.verifyUserByToken(token);
   }
@@ -72,7 +74,9 @@ export class UserResolver {
     return await this.userService.setPasswordResetToken(email);
   }
 
-  @Mutation(returns => UserType)
+  @Mutation(returns => UserType, {
+    nullable: true,
+  })
   async resetPasswordByToken(@Args('input') input: ResetPasswordInput) {
     return await this.userService.resetPasswordByToken(input);
   }

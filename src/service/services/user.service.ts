@@ -169,7 +169,12 @@ export class UserService {
           .getRepository(User)
           .save(user, { reload: false });
       } else {
-        throw new BadRequestException('Verification Token Expired');
+        throw new BadRequestException([
+          {
+            name: 'token',
+            message: 'Verification token expired',
+          },
+        ]);
       }
     }
   }
@@ -182,13 +187,22 @@ export class UserService {
 
   async refreshVerificationToken(emailAddress: string): Promise<boolean> {
     const user = await this.getUserByEmailAddress(emailAddress);
+
+    if (!user) {
+      throw new BadRequestException([
+        {
+          name: 'email',
+          message: 'Invalid email address',
+        },
+      ]);
+    }
+
     if (user && !user.verified) {
       await this.setVerificationToken(user);
       //TODO SEND EMAIL
-      return true;
     }
 
-    return false;
+    return true;
   }
 
   async getUserByEmailAddress(emailAddress: string): Promise<User | undefined> {
@@ -204,10 +218,15 @@ export class UserService {
     return await this.getUserByEmailAddress(user.email);
   }
 
-  async setPasswordResetToken(emailAddress: string): Promise<User | undefined> {
+  async setPasswordResetToken(emailAddress: string): Promise<User> {
     const user = await this.getUserByEmailAddress(emailAddress);
     if (!user) {
-      return;
+      throw new BadRequestException([
+        {
+          name: 'email',
+          message: 'Cannot send reset password token',
+        },
+      ]);
     }
     user.passwordResetToken = this.verificationTokenGenerator.generateVerificationToken();
     //todo SEND EMAIL
@@ -219,7 +238,10 @@ export class UserService {
   ): Promise<User | undefined> {
     const { passwordResetToken, password } = input;
     const user = await this.connection.getRepository(User).findOne({
-      where: { passwordResetToken },
+      withDeleted: true,
+      where: {
+        passwordResetToken,
+      },
     });
 
     if (user) {
@@ -234,7 +256,12 @@ export class UserService {
           .getRepository(User)
           .save(user, { reload: false });
       } else {
-        throw new BadRequestException('Reset password Token Expired');
+        throw new BadRequestException([
+          {
+            name: 'passwordResetToken',
+            message: 'Reset password Token Expired',
+          },
+        ]);
       }
     }
   }

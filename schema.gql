@@ -50,9 +50,9 @@ type Mutation {
   createUserByAdmin(role: String!, credentials: CreateUserInput!): UserType!
   removeUser(email: String!): UserType!
   recoverUser(email: String!): UserType!
-  verifyUser(token: String!): UserType!
+  verifyUser(token: String!): UserType
   setPasswordResetToken(email: String!): UserType!
-  resetPasswordByToken(input: ResetPasswordInput!): UserType!
+  resetPasswordByToken(input: ResetPasswordInput!): UserType
   refreshVerificationToken(email: String!): Boolean!
   updateUser(input: UpdateUserInput!): UserType!
   register(credentials: CreateUserInput!): UserType!
