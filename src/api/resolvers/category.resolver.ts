@@ -23,6 +23,11 @@ export class CategoryResolver {
     return this.categoryService.findAll(limit, page);
   }
 
+  @Query(returns => [CategoryType])
+  async getAllCategories() {
+    return this.categoryService.getAllWithoutDeleted();
+  }
+
   @Query(returns => CategoryType)
   async findOneByTitle(@Args('title') title: string) {
     return this.categoryService.findOne(title);

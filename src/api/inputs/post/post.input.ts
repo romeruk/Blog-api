@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsEmail, IsNotEmpty, MinLength, IsOptional } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 
 @InputType()
 export class CreatePostInput {
@@ -16,10 +16,4 @@ export class CreatePostInput {
     each: true,
   })
   categories: string[];
-
-  @Field(type => [String])
-  @IsNotEmpty({
-    each: true,
-  })
-  images: string[];
 }

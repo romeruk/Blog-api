@@ -1,14 +1,12 @@
-import { Module, ValidationPipe } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ApiModule } from './api/api.module';
 import { databaseConfig } from './config/databse.config';
 import { ServiceModule } from './service/service.module';
 import { ApplicationConfig } from './config/app.config';
-import { APP_PIPE } from '@nestjs/core';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -37,10 +35,9 @@ import { APP_PIPE } from '@nestjs/core';
         };
       },
     }),
+    CloudinaryModule,
     ApiModule,
     ServiceModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

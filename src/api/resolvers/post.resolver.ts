@@ -1,6 +1,7 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
+import { GraphQLUpload } from 'apollo-server-express';
 import { GqlAuthGuard } from 'src/common/guards/gql.guard';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, Inject } from '@nestjs/common';
 import { CreatePostInput } from '../inputs/post/post.input';
 import { CurrentUser } from 'src/common/decorators/decorators';
 import { PostService } from 'src/service/services/post.service';
@@ -10,11 +11,6 @@ import { PostType } from '../types/post/post.type';
 @Resolver('Post')
 export class PostResolver {
   constructor(private postService: PostService) {}
-
-  @Query(returns => String)
-  hello() {
-    return 'hello';
-  }
 
   @UseGuards(GqlAuthGuard)
   @Mutation(returns => PostType)

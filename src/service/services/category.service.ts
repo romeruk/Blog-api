@@ -122,6 +122,12 @@ export class CategoryService {
     return updatedCategory;
   }
 
+  async getAllWithoutDeleted(): Promise<Category[]> {
+    const categories = await this.connection.getRepository(Category).find();
+
+    return categories;
+  }
+
   async findAll(limit = 10, page = 0): Promise<Categories> {
     const [categories, total] = await this.connection
       .getRepository(Category)

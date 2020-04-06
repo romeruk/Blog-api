@@ -9,6 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { CategoryService } from './services/category.service';
 import { PostService } from './services/post.service';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 
 const services = [UserService, AuthService, CategoryService, PostService];
 
@@ -26,6 +27,7 @@ const modules = [
       };
     },
   }),
+  CloudinaryModule,
 ];
 
 const Exports = [JwtModule];

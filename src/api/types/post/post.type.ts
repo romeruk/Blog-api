@@ -1,4 +1,4 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { ObjectType, Field } from '@nestjs/graphql';
 import { UserType } from '../user/user.type';
 import { CategoryType } from '../category/category.type';
 

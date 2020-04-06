@@ -27,7 +27,6 @@ input CreatePostInput {
   title: String!
   content: String!
   categories: [String!]!
-  images: [String!]!
 }
 
 input CreateUserInput {
@@ -80,9 +79,9 @@ type Query {
   findAllUsers(page: Float!, limit: Float!): Users!
   getMe: UserType!
   findAllCategories(page: Float!, limit: Float!): Categories!
+  getAllCategories: [CategoryType!]!
   findOneByTitle(title: String!): CategoryType!
   findOneBySlug(slug: String!): CategoryType!
-  hello: String!
 }
 
 input ResetPasswordInput {

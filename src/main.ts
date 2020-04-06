@@ -6,6 +6,7 @@ import {
   ValidationError,
   BadRequestException,
 } from '@nestjs/common';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -27,7 +28,8 @@ async function bootstrap() {
       },
     }),
   );
-
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
   app.use(cookieParser());
   await app.listen(5000);
 }

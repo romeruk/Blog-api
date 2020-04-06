@@ -2,6 +2,8 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
@@ -13,6 +15,11 @@ import { UserService } from './user.service';
 import { CategoryService } from './category.service';
 import { CreatePostInput } from 'src/api/inputs/post/post.input';
 import { Image as ImageEntity } from 'src/entity/image/image.entity';
+import { UserRole } from 'src/entity/user/user.entity';
+import { Cloudinary } from 'src/cloudinary/cloudinary.provider';
+import { Category } from 'src/entity/category/category.entity';
+
+const regexImages = /(data:image\/[^;]+;base64[^"]+)/g;
 
 @Injectable()
 export class PostService {
@@ -20,71 +27,106 @@ export class PostService {
     @InjectConnection() private connection: Connection,
     private userService: UserService,
     private categoryService: CategoryService,
+    @Inject(Cloudinary) private cloudinary,
   ) {}
 
   async createPost(input: CreatePostInput, @CurrentUser() user: IPayload) {
-    const existing = await this.findOne(input.title);
+    const { title, categories, ...rest } = input;
+    let { content } = rest;
+
+    const existing = await this.findOne(title);
     if (existing) {
       throw new InternalServerErrorException('Title must be unique');
+    }
+
+    const contentImages = content.match(regexImages);
+
+    if (!contentImages) {
+      throw new BadRequestException([
+        {
+          name: 'content',
+          message: 'Need to upload at least 1 image',
+        },
+      ]);
+    }
+
+    const uploadedImages = [];
+
+    const Promises: any[] = contentImages.map(
+      file =>
+        new Promise((resolve, reject) => {
+          this.cloudinary.uploader.upload(file, function(error, result) {
+            if (error) {
+              reject(
+                new BadRequestException([
+                  {
+                    name: 'content',
+                    message: 'Error uploading images',
+                  },
+                ]),
+              );
+            } else {
+              resolve(result.url);
+            }
+          });
+        }),
+    );
+
+    for (const promise of Promises) {
+      const res = await promise;
+      uploadedImages.push(res);
+    }
+
+    for (let i = 0; i < uploadedImages.length; i++) {
+      content = content.replace(contentImages[i], uploadedImages[i]);
     }
 
     const author = await this.userService.getUserByEmailAddress(user.email);
 
     const post = new Post();
-    post.title = input.title;
-    post.slug = slugify(input.title);
-    post.content = input.content;
+    post.title = title;
+    post.slug = slugify(title);
+    post.content = content;
 
-    // if (user.isAdmin) {
-    //   post.isActive = true;
-    // }
+    if (user.role === UserRole.ADMIN || user.role === UserRole.SUPERADMIN) {
+      post.isActive = true;
+    } else {
+      post.isActive = false;
+    }
 
     post.user = author;
 
-    let savedPost = await this.connection.manager.save(post);
+    const postImages: ImageEntity[] = [];
+    const postCategories: Category[] = [];
 
-    await this.assignImages(savedPost.title, input.images);
-
-    for (const category of input.categories) {
-      savedPost = await this.assignCategory(savedPost.title, category);
+    for (const image of uploadedImages) {
+      const newImage = new ImageEntity();
+      newImage.url = image;
+      const img = await this.connection
+        .getRepository(ImageEntity)
+        .save(newImage);
+      postImages.push(img);
     }
 
-    return savedPost;
-  }
+    for (const category of categories) {
+      const findCategory = await this.categoryService.findOne(category);
 
-  async assignImages(postTitle: string, images: string[]) {
-    const post = await this.findOne(postTitle);
-    if (!post) {
-      throw new NotFoundException('Post not found');
+      if (!findCategory) {
+        throw new NotFoundException([
+          {
+            name: 'categories',
+            message: `Category ${category} not found`,
+          },
+        ]);
+      }
+
+      postCategories.push(findCategory);
     }
 
-    for (const image of images) {
-      const newImg = new ImageEntity();
-      newImg.post = post;
-      newImg.url = image;
-      await this.connection.manager.save(newImg);
-    }
-  }
+    post.categories = postCategories;
+    post.images = postImages;
 
-  async assignCategory(
-    postTitle: string,
-    categoryTitle: string,
-  ): Promise<Post> {
-    const post = await this.findOne(postTitle);
-    if (!post) {
-      throw new NotFoundException('Post not found');
-    }
-
-    const category = await this.categoryService.findOne(categoryTitle);
-
-    if (!category) {
-      throw new NotFoundException('Category not found');
-    }
-
-    post.categories.push(category);
-
-    await this.connection.manager.save(post, { reload: false });
-    return post;
+    return await this.connection.manager.save(post, { reload: false });
   }
 
   async findOne(title: string) {

@@ -9,10 +9,11 @@ import { CategoryResolver } from './resolvers/category.resolver';
 import { CategoryService } from 'src/service/services/category.service';
 import { PostResolver } from './resolvers/post.resolver';
 import { PostService } from 'src/service/services/post.service';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 
 const resolvers = [UserResolver, AuthResolver, CategoryResolver, PostResolver];
 const services = [UserService, AuthService, CategoryService, PostService];
-const modules = [ServiceModule];
+const modules = [ServiceModule, CloudinaryModule];
 
 @Module({
   imports: [...modules],
