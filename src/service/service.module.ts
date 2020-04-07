@@ -10,10 +10,18 @@ import { JwtStrategy } from './auth/jwt.strategy';
 import { CategoryService } from './services/category.service';
 import { PostService } from './services/post.service';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
-const services = [UserService, AuthService, CategoryService, PostService];
+const services = [
+  UserService,
+  AuthService,
+  CategoryService,
+  PostService,
+  CloudinaryService,
+];
 
 const modules = [
+  CloudinaryModule,
   PassportModule,
   JwtModule.registerAsync({
     imports: [ConfigModule],
@@ -27,10 +35,9 @@ const modules = [
       };
     },
   }),
-  CloudinaryModule,
 ];
 
-const Exports = [JwtModule];
+const Exports = [JwtModule, CloudinaryModule];
 
 @Module({
   imports: [...modules],

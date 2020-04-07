@@ -1,12 +1,11 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
-import { GraphQLUpload } from 'apollo-server-express';
 import { GqlAuthGuard } from 'src/common/guards/gql.guard';
-import { UseGuards, Inject } from '@nestjs/common';
-import { CreatePostInput } from '../inputs/post/post.input';
+import { UseGuards } from '@nestjs/common';
+import { CreatePostInput, EditPostInput } from '../inputs/post/post.input';
 import { CurrentUser } from 'src/common/decorators/decorators';
 import { PostService } from 'src/service/services/post.service';
 import { IPayload } from 'src/common/interfaces/payload.interface';
-import { PostType } from '../types/post/post.type';
+import { PostType, Posts, EditPostType } from '../types/post/post.type';
 
 @Resolver('Post')
 export class PostResolver {
@@ -19,5 +18,36 @@ export class PostResolver {
     @CurrentUser() user: IPayload,
   ) {
     return await this.postService.createPost(input, user);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(returns => Posts)
+  async findMyPosts(
+    @Args('limit') limit: number,
+    @Args('page') page: number,
+    @CurrentUser() user: IPayload,
+  ) {
+    return await this.postService.findMyPosts(limit, page, user);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Mutation(returns => Boolean)
+  async removeMyPost(
+    @Args('title') title: string,
+    @CurrentUser() user: IPayload,
+  ) {
+    return this.postService.removeMyPost(title, user);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(returns => EditPostType)
+  async findOneBySlug(@Args('slug') slug: string) {
+    return this.postService.getPostWithAllCategories(slug);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Mutation(returns => PostType)
+  async editPost(@Args('input') input: EditPostInput) {
+    return await this.postService.editPost(input);
   }
 }

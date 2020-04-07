@@ -1,4 +1,4 @@
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { UserType } from '../user/user.type';
 import { CategoryType } from '../category/category.type';
 
@@ -24,4 +24,20 @@ export class PostType {
   user: UserType;
   @Field(type => [CategoryType])
   categories: CategoryType[];
+}
+
+@ObjectType()
+export class EditPostType extends PostType {
+  @Field(type => [CategoryType], {
+    nullable: true,
+  })
+  allCategories?: CategoryType[];
+}
+
+@ObjectType()
+export class Posts {
+  @Field(type => Int)
+  total: number;
+  @Field(type => [CategoryType])
+  posts: PostType[];
 }

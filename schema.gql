@@ -41,6 +41,23 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+input EditPostInput {
+  title: String!
+  content: String!
+  categories: [String!]!
+}
+
+type EditPostType {
+  title: String!
+  slug: String!
+  content: String!
+  isActive: Boolean!
+  images: [Image!]!
+  user: UserType!
+  categories: [CategoryType!]!
+  allCategories: [CategoryType!]
+}
+
 type Image {
   url: String!
 }
@@ -62,6 +79,13 @@ type Mutation {
   recoverCategory(title: String!): CategoryType!
   updateCategory(input: CategoryUpdateInput!, title: String!): CategoryType!
   createPost(input: CreatePostInput!): PostType!
+  removeMyPost(title: String!): Boolean!
+  editPost(input: EditPostInput!): PostType!
+}
+
+type Posts {
+  total: Int!
+  posts: [CategoryType!]!
 }
 
 type PostType {
@@ -81,7 +105,8 @@ type Query {
   findAllCategories(page: Float!, limit: Float!): Categories!
   getAllCategories: [CategoryType!]!
   findOneByTitle(title: String!): CategoryType!
-  findOneBySlug(slug: String!): CategoryType!
+  findOneBySlug(slug: String!): EditPostType!
+  findMyPosts(page: Float!, limit: Float!): Posts!
 }
 
 input ResetPasswordInput {

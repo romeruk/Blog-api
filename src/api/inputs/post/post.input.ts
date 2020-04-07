@@ -17,3 +17,6 @@ export class CreatePostInput {
   })
   categories: string[];
 }
+
+@InputType()
+export class EditPostInput extends CreatePostInput {}
