@@ -1,29 +1,52 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { Cloudinary } from './cloudinary.provider';
-// import { FileUpload } from 'src/api/resolvers/post.resolver';
+import { Post } from 'src/entity/post/post.entity';
 
 @Injectable()
 export class CloudinaryService {
   constructor(@Inject(Cloudinary) private cloudinary) {}
 
-  // async UploadFile(file: FileUpload) {
-  //   const { filename, createReadStream } = await file[0];
+  uploadImages(contentImages: string[]) {
+    const promises: Promise<any>[] = contentImages.map(
+      file =>
+        new Promise((resolve, reject) => {
+          this.cloudinary.uploader.upload(file, function(error, result) {
+            if (error) {
+              reject(
+                new BadRequestException([
+                  {
+                    name: 'content',
+                    message: 'Error uploading images',
+                  },
+                ]),
+              );
+            } else {
+              resolve(result.url);
+            }
+          });
+        }),
+    );
 
-  //   /* eslint-disable @typescript-eslint/camelcase */
-  //   this.cloudinary.config({
-  //     cloud_name: 'blogapi',
-  //     api_key: '567442435347886',
-  //     api_secret: 'b8GnG6B46dUhUvuOV1lCMYHRYdY',
-  //   });
+    return promises;
+  }
 
-  //   const stream = this.cloudinary.uploader.upload_stream(function(
-  //     error,
-  //     result,
-  //   ) {
-  //     if (error) console.log(error);
+  removeCloudinaryImages(post: Post) {
+    const promises: Promise<any>[] = post.images.map(
+      image =>
+        new Promise((resolve, reject) => {
+          this.cloudinary.uploader.destroy(
+            image.url.match(/([^\/.]+)\.[^.]*$/)[1],
+            function(error, result) {
+              if (error) {
+                reject(new BadRequestException('Cannot remove image'));
+              } else {
+                resolve(result);
+              }
+            },
+          );
+        }),
+    );
 
-  //     console.log(result);
-  //   });
-  //   createReadStream(filename).pipe(stream);
-  // }
+    return promises;
+  }
 }
