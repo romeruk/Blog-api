@@ -81,11 +81,12 @@ type Mutation {
   createPost(input: CreatePostInput!): PostType!
   removeMyPost(title: String!): Boolean!
   editPost(input: EditPostInput!): PostType!
+  activeOrDisActivePost(title: String!): PostType!
 }
 
 type Posts {
   total: Int!
-  posts: [CategoryType!]!
+  posts: [PostType!]!
 }
 
 type PostType {
@@ -107,6 +108,7 @@ type Query {
   findOneByTitle(title: String!): CategoryType!
   findOneBySlug(slug: String!): EditPostType!
   findMyPosts(page: Float!, limit: Float!): Posts!
+  getAllPosts(page: Float!, limit: Float!): Posts!
 }
 
 input ResetPasswordInput {

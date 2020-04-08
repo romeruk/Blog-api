@@ -38,6 +38,6 @@ export class EditPostType extends PostType {
 export class Posts {
   @Field(type => Int)
   total: number;
-  @Field(type => [CategoryType])
+  @Field(type => [PostType])
   posts: PostType[];
 }

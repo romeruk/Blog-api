@@ -236,6 +236,31 @@ export class PostService {
     return post;
   }
 
+  async getAllPosts(limit = 10, page = 0): Promise<Posts> {
+    const [posts, total] = await this.connection
+      .getRepository(Post)
+      .findAndCount({
+        skip: page > 0 ? (page - 1) * limit : 0,
+        take: limit,
+      });
+
+    const foundPosts = new Posts();
+    foundPosts.posts = posts;
+    foundPosts.total = total;
+
+    return foundPosts;
+  }
+
+  async activeOrDisActivePost(title: string) {
+    const post = await this.findOne(title);
+
+    const status = post.isActive;
+
+    post.isActive = !status;
+
+    return await this.connection.getRepository(Post).save(post);
+  }
+
   async assignImages(uploadedImages: string[]): Promise<ImageEntity[]> {
     const postImages: ImageEntity[] = [];
     for (const image of uploadedImages) {

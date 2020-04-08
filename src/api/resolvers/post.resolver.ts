@@ -2,10 +2,12 @@ import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { GqlAuthGuard } from 'src/common/guards/gql.guard';
 import { UseGuards } from '@nestjs/common';
 import { CreatePostInput, EditPostInput } from '../inputs/post/post.input';
-import { CurrentUser } from 'src/common/decorators/decorators';
+import { CurrentUser, Roles } from 'src/common/decorators/decorators';
 import { PostService } from 'src/service/services/post.service';
 import { IPayload } from 'src/common/interfaces/payload.interface';
 import { PostType, Posts, EditPostType } from '../types/post/post.type';
+import { AdminGqlGuard } from 'src/common/guards/role.guard';
+import { UserRole } from 'src/entity/user/user.entity';
 
 @Resolver('Post')
 export class PostResolver {
@@ -49,5 +51,17 @@ export class PostResolver {
   @Mutation(returns => PostType)
   async editPost(@Args('input') input: EditPostInput) {
     return await this.postService.editPost(input);
+  }
+
+  @Query(returns => Posts)
+  async getAllPosts(@Args('limit') limit: number, @Args('page') page: number) {
+    return this.postService.getAllPosts(limit, page);
+  }
+
+  @UseGuards(GqlAuthGuard, AdminGqlGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Mutation(returns => PostType)
+  async activeOrDisActivePost(@Args('title') title: string) {
+    return this.postService.activeOrDisActivePost(title);
   }
 }
