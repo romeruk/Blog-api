@@ -34,7 +34,7 @@ export class CategoryResolver {
   }
 
   @Query(returns => CategoryType)
-  async findOneBySlug(@Args('slug') slug: string) {
+  async findOneBySlugCategory(@Args('slug') slug: string) {
     return this.categoryService.findOneBySlug(slug);
   }
 

@@ -106,8 +106,9 @@ type Query {
   findAllCategories(page: Float!, limit: Float!): Categories!
   getAllCategories: [CategoryType!]!
   findOneByTitle(title: String!): CategoryType!
-  findOneBySlug(slug: String!): EditPostType!
+  findOneBySlugCategory(slug: String!): CategoryType!
   findMyPosts(page: Float!, limit: Float!): Posts!
+  findOneBySlug(slug: String!): EditPostType!
   getAllPosts(page: Float!, limit: Float!): Posts!
 }
 
