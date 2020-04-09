@@ -131,15 +131,19 @@ export class PostService {
       throw new NotFoundException('Post not found');
     }
 
-    if (post.user.email !== user.email) {
+    if (
+      post.user.email === user.email ||
+      user.role === UserRole.ADMIN ||
+      user.role === UserRole.SUPERADMIN
+    ) {
+      const clodinaryImages = this.cloudinary.removeCloudinaryImages(post);
+      await Promise.all(clodinaryImages);
+
+      await this.connection.getRepository(ImageEntity).remove(post.images);
+      await this.connection.getRepository(Post).remove(post);
+    } else {
       throw new BadRequestException('You cannot remove this post');
     }
-
-    const clodinaryImages = this.cloudinary.removeCloudinaryImages(post);
-    await Promise.all(clodinaryImages);
-
-    await this.connection.getRepository(ImageEntity).remove(post.images);
-    await this.connection.getRepository(Post).remove(post);
 
     return true;
   }
