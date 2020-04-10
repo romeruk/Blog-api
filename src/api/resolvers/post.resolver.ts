@@ -54,8 +54,17 @@ export class PostResolver {
   }
 
   @Query(returns => Posts)
-  async getAllPosts(@Args('limit') limit: number, @Args('page') page: number) {
-    return this.postService.getAllPosts(limit, page);
+  async getAllPosts(
+    @Args('limit') limit: number,
+    @Args('page') page: number,
+    @Args({
+      name: 'categories',
+      type: () => [String],
+      nullable: true,
+    })
+    categories: string[],
+  ) {
+    return this.postService.getAllPosts(limit, page, categories);
   }
 
   @UseGuards(GqlAuthGuard, AdminGqlGuard)

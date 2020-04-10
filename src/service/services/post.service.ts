@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { Connection, In } from 'typeorm';
 import { CurrentUser } from 'src/common/decorators/decorators';
 import { IPayload } from 'src/common/interfaces/payload.interface';
 import { Post } from 'src/entity/post/post.entity';
@@ -240,13 +240,27 @@ export class PostService {
     return post;
   }
 
-  async getAllPosts(limit = 10, page = 0): Promise<Posts> {
-    const [posts, total] = await this.connection
+  async getAllPosts(
+    limit = 10,
+    page = 0,
+    arrOfCategories: string[] = [],
+  ): Promise<Posts> {
+    const query = this.connection
       .getRepository(Post)
-      .findAndCount({
-        skip: page > 0 ? (page - 1) * limit : 0,
-        take: limit,
-      });
+      .createQueryBuilder('post')
+      .skip(page > 0 ? (page - 1) * limit : 0)
+      .take(limit)
+      .leftJoinAndSelect('post.images', 'images');
+
+    if (arrOfCategories && arrOfCategories.length > 0) {
+      query
+        .leftJoinAndSelect('post.categories', 'categories')
+        .where('categories.title IN (:...categories)', {
+          categories: arrOfCategories,
+        });
+    }
+
+    const [posts, total] = await query.getManyAndCount();
 
     const foundPosts = new Posts();
     foundPosts.posts = posts;
