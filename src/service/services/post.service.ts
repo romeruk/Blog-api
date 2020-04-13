@@ -244,10 +244,18 @@ export class PostService {
     limit = 10,
     page = 0,
     arrOfCategories: string[] = [],
+    onlyActive = true,
   ): Promise<Posts> {
     const query = this.connection
       .getRepository(Post)
       .createQueryBuilder('post')
+      .orderBy('post.createdAt', 'DESC');
+
+    if (onlyActive) {
+      query.where('post.isActive = :isActive', { isActive: true });
+    }
+
+    query
       .skip(page > 0 ? (page - 1) * limit : 0)
       .take(limit)
       .leftJoinAndSelect('post.images', 'images');

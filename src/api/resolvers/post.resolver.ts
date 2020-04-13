@@ -47,6 +47,11 @@ export class PostResolver {
     return this.postService.getPostWithAllCategories(slug);
   }
 
+  @Query(returns => PostType)
+  async findOnePost(@Args('slug') slug: string) {
+    return this.postService.findOneBySlug(slug);
+  }
+
   @UseGuards(GqlAuthGuard)
   @Mutation(returns => PostType)
   async editPost(@Args('input') input: EditPostInput) {
@@ -63,8 +68,14 @@ export class PostResolver {
       nullable: true,
     })
     categories: string[],
+    @Args({
+      name: 'onlyActive',
+      type: () => Boolean,
+      nullable: true,
+    })
+    onlyActive: boolean,
   ) {
-    return this.postService.getAllPosts(limit, page, categories);
+    return this.postService.getAllPosts(limit, page, categories, onlyActive);
   }
 
   @UseGuards(GqlAuthGuard, AdminGqlGuard)
