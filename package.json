@@ -25,6 +25,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^1.4.2",
     "@nestjs/common": "^7.0.0",
     "@nestjs/config": "^0.4.0",
     "@nestjs/core": "^7.0.0",
@@ -40,8 +41,10 @@
     "cookie-parser": "^1.4.5",
     "graphql": "^14.6.0",
     "graphql-tools": "^4.0.7",
+    "handlebars": "^4.7.6",
     "ms": "^2.1.2",
     "nanoid": "^2.1.11",
+    "nodemailer": "^6.4.6",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "pg": "^7.18.2",

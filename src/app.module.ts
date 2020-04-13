@@ -2,11 +2,13 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
+import { HandlebarsAdapter, MailerModule } from '@nestjs-modules/mailer';
 import { ApiModule } from './api/api.module';
 import { databaseConfig } from './config/databse.config';
 import { ServiceModule } from './service/service.module';
 import { ApplicationConfig } from './config/app.config';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -34,6 +36,34 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
           cli: configService.get('database.cli'),
         };
       },
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        transport: {
+          host: configService.get<string>('EMAIL_HOST'),
+          port: configService.get<number>('EMAIL_PORT'),
+          tls: {
+            ciphers: 'SSLv3',
+          },
+          secure: false, // true for 465, false for other ports
+          auth: {
+            user: configService.get<string>('EMAIL_USER'),
+            pass: configService.get<string>('EMAIL_PASSWORD'),
+          },
+        },
+        defaults: {
+          from: 'blog api',
+        },
+        template: {
+          dir: join(__dirname, '/email/templates'),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
     }),
     CloudinaryModule,
     ApiModule,

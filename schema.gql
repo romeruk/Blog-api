@@ -109,7 +109,8 @@ type Query {
   findOneBySlugCategory(slug: String!): CategoryType!
   findMyPosts(page: Float!, limit: Float!): Posts!
   findOneBySlug(slug: String!): EditPostType!
-  getAllPosts(categories: [String!], page: Float!, limit: Float!): Posts!
+  findOnePost(slug: String!): PostType!
+  getAllPosts(onlyActive: Boolean, categories: [String!], page: Float!, limit: Float!): Posts!
 }
 
 input ResetPasswordInput {

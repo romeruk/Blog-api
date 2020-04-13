@@ -10,6 +10,7 @@ import * as bcryptjs from 'bcryptjs';
 import { User, UserRole } from 'src/entity/user/user.entity';
 import { VerificationTokenGenerator } from '../helpers/verification-token-generator';
 import { ConfigService } from '@nestjs/config';
+import { MailerService } from '@nestjs-modules/mailer';
 import {
   CreateUserInput,
   ResetPasswordInput,
@@ -25,6 +26,7 @@ export class UserService {
     @InjectConnection() private connection: Connection,
     private configService: ConfigService,
     private verificationTokenGenerator: VerificationTokenGenerator,
+    private readonly mailerService: MailerService,
   ) {}
 
   async createUser(
@@ -70,13 +72,34 @@ export class UserService {
     user.role = role;
 
     if (isVerificationRequired) {
-      user.verificationToken = this.verificationTokenGenerator.generateVerificationToken();
+      const frontUrl = this.configService.get<string>('FRONT_URL');
+      const token = this.verificationTokenGenerator.generateVerificationToken();
+      user.verificationToken = token;
       user.verified = false;
+
+      const success = await this.mailerService.sendMail({
+        to: `${user.email}`,
+        from: 'nestjsblogapi@gmail.com',
+        subject: 'User registration',
+        template: 'email',
+        context: {
+          username: `${firstName} ${lastName}`,
+          url: `${frontUrl}/verify/${token}`,
+          linkText: 'Verify my account',
+        },
+      });
+
+      if (!success) {
+        throw new InternalServerErrorException([
+          {
+            name: 'email',
+            message: 'Error sending verification token',
+          },
+        ]);
+      }
     } else {
       user.verified = true;
     }
-
-    //TODO SEND EMAIL
 
     return await this.connection
       .getRepository(User)
@@ -198,8 +221,30 @@ export class UserService {
     }
 
     if (user && !user.verified) {
-      await this.setVerificationToken(user);
-      //TODO SEND EMAIL
+      const restoredUser = await this.setVerificationToken(user);
+
+      const frontUrl = this.configService.get<string>('FRONT_URL');
+
+      const success = await this.mailerService.sendMail({
+        to: `${user.email}`,
+        from: 'nestjsblogapi@gmail.com',
+        subject: 'Verify account',
+        template: 'email',
+        context: {
+          username: `${user.firstName} ${user.lastName}`,
+          url: `${frontUrl}/verify/${restoredUser.verificationToken}`,
+          linkText: 'Verify my account',
+        },
+      });
+
+      if (!success) {
+        throw new InternalServerErrorException([
+          {
+            name: 'passwordResetToken',
+            message: 'Error sending restore password token',
+          },
+        ]);
+      }
     }
 
     return true;
@@ -228,8 +273,32 @@ export class UserService {
         },
       ]);
     }
-    user.passwordResetToken = this.verificationTokenGenerator.generateVerificationToken();
-    //todo SEND EMAIL
+    const token = this.verificationTokenGenerator.generateVerificationToken();
+    user.passwordResetToken = token;
+
+    const frontUrl = this.configService.get<string>('FRONT_URL');
+
+    const success = await this.mailerService.sendMail({
+      to: `${user.email}`,
+      from: 'nestjsblogapi@gmail.com',
+      subject: 'Restore password',
+      template: 'email',
+      context: {
+        username: `${user.firstName} ${user.lastName}`,
+        url: `${frontUrl}/resetpassword/${token}`,
+        linkText: 'Restore password',
+      },
+    });
+
+    if (!success) {
+      throw new InternalServerErrorException([
+        {
+          name: 'passwordResetToken',
+          message: 'Error sending restore password token',
+        },
+      ]);
+    }
+
     return this.connection.getRepository(User).save(user, { reload: false });
   }
 
