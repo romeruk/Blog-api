@@ -19,10 +19,6 @@ type CategoryType {
   deletedAt: DateTime
 }
 
-input CategoryUpdateInput {
-  title: String!
-}
-
 input CreatePostInput {
   title: String!
   content: String!
@@ -75,9 +71,7 @@ type Mutation {
   logIn(credentials: UserLogInInput!): UserType!
   logOut: Boolean!
   createCategory(input: CategoryCreateInput!): CategoryType!
-  removeCategory(title: String!): CategoryType!
-  recoverCategory(title: String!): CategoryType!
-  updateCategory(input: CategoryUpdateInput!, title: String!): CategoryType!
+  removeCategory(title: String!): Boolean!
   createPost(input: CreatePostInput!): PostType!
   removeMyPost(title: String!): Boolean!
   editPost(input: EditPostInput!): PostType!
