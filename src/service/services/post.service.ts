@@ -212,7 +212,7 @@ export class PostService {
     let postWithAllCategories = new EditPostType();
     const post = await this.findOneBySlug(slug);
     postWithAllCategories = post;
-    const categories = await this.categoryService.getAllWithoutDeleted();
+    const categories = await this.categoryService.getAllCategories();
     postWithAllCategories.allCategories = categories;
 
     return postWithAllCategories;
