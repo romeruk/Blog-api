@@ -25,7 +25,7 @@ export class CategoryResolver {
 
   @Query(returns => [CategoryType])
   async getAllCategories() {
-    return this.categoryService.getAllWithoutDeleted();
+    return this.categoryService.getAllCategories();
   }
 
   @Query(returns => CategoryType)
@@ -47,24 +47,8 @@ export class CategoryResolver {
 
   @UseGuards(GqlAuthGuard, AdminGqlGuard)
   @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
-  @Mutation(returns => CategoryType)
+  @Mutation(returns => Boolean)
   async removeCategory(@Args('title') title: string) {
     return this.categoryService.removeCategory(title);
-  }
-  @UseGuards(GqlAuthGuard, AdminGqlGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
-  @Mutation(returns => CategoryType)
-  async recoverCategory(@Args('title') title: string) {
-    return this.categoryService.recoverCategory(title);
-  }
-
-  @UseGuards(GqlAuthGuard, AdminGqlGuard)
-  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
-  @Mutation(returns => CategoryType)
-  async updateCategory(
-    @Args('title') title: string,
-    @Args('input') input: CategoryUpdateInput,
-  ) {
-    return await this.categoryService.updateCategory(title, input);
   }
 }

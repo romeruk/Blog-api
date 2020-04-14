@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { Connection, Equal } from 'typeorm';
 import {
   CategoryCreateInput,
   CategoryUpdateInput,
@@ -12,6 +12,7 @@ import {
 import { Category } from 'src/entity/category/category.entity';
 import slugify from 'slugify';
 import { Categories } from 'src/api/types/category/category.type';
+import { Post } from 'src/entity/post/post.entity';
 
 @Injectable()
 export class CategoryService {
@@ -19,7 +20,6 @@ export class CategoryService {
 
   async findOne(title: string) {
     const category = await this.connection.getRepository(Category).findOne({
-      withDeleted: true,
       where: {
         title,
       },
@@ -30,7 +30,6 @@ export class CategoryService {
 
   async findOneBySlug(slug: string) {
     const category = await this.connection.getRepository(Category).findOne({
-      withDeleted: true,
       where: {
         slug,
       },
@@ -60,79 +59,43 @@ export class CategoryService {
       .save(category, { reload: false });
   }
 
-  async removeCategory(title: string): Promise<Category> {
+  async removeCategory(title: string) {
     const category = await this.findOne(title);
 
     if (!category) {
       throw new NotFoundException('Category not found');
     }
 
-    const removedCategory = await this.connection
-      .getRepository(Category)
-      .softRemove(category);
+    const posts = await this.connection
+      .getRepository(Post)
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.categories', 'categories')
+      .where('categories.title = :title', { title })
+      .getMany();
 
-    return removedCategory;
-  }
+    if (posts && posts.length) {
+      for (const post of posts) {
+        post.categories = post.categories.filter(category => {
+          category.title !== category.title;
+        });
+      }
 
-  async recoverCategory(title: string): Promise<Category> {
-    const category = await this.findOne(title);
-
-    if (!category) {
-      throw new NotFoundException('Category not found');
+      await this.connection.manager.save(posts, { reload: false });
     }
 
-    const restoredCategory = await this.connection
-      .getRepository(Category)
-      .recover(category);
+    await this.connection.getRepository(Category).remove(category);
 
-    return restoredCategory;
+    return true;
   }
 
-  async updateCategory(
-    title: string,
-    input: CategoryUpdateInput,
-  ): Promise<Category> {
-    const existing = await this.findOne(input.title);
-
-    if (existing) {
-      throw new InternalServerErrorException([
-        {
-          name: 'title',
-          message: 'Title must be unique',
-        },
-      ]);
-    }
-
-    const findCategory = await this.findOne(title);
-
-    if (!findCategory) {
-      throw new NotFoundException('Category not found');
-    }
-
-    await this.connection
-      .getRepository(Category)
-      .createQueryBuilder()
-      .update(Category)
-      .set({ title: input.title, slug: slugify(input.title) })
-      .where('title = :title', { title })
-      .execute();
-
-    const updatedCategory = await this.findOne(input.title);
-
-    return updatedCategory;
-  }
-
-  async getAllWithoutDeleted(): Promise<Category[]> {
-    const categories = await this.connection.getRepository(Category).find();
-
-    return categories;
+  async getAllCategories(): Promise<Category[]> {
+    return await this.connection.getRepository(Category).find();
   }
 
   async findAll(limit = 10, page = 0): Promise<Categories> {
     const [categories, total] = await this.connection
       .getRepository(Category)
       .findAndCount({
-        withDeleted: true,
         skip: page > 0 ? (page - 1) * limit : 0,
         take: limit,
       });
