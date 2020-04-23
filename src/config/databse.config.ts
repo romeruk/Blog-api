@@ -25,3 +25,12 @@ export const databaseConfig = registerAs(
     },
   }),
 );
+
+export const databaseTestConfig = registerAs(
+  'databasedev',
+  (): TypeOrmModuleOptions => ({
+    ...databaseConfig(),
+    synchronize: true,
+    dropSchema: true,
+  }),
+);
