@@ -35,4 +35,5 @@ lerna-debug.log*
 
 #custom
 .env
+.env.development
 /src/migrations
